@@ -50,11 +50,16 @@ public class MingSession {
 		this.request = request;
 		this.response = response;
 		
+		if(hibernateSession == null) {
+			System.err.println("Can't initialize HibernateSession as there is no HibernateSession.");
+			return;
+		}
+		
 		try {
 			hibernateSession = HibernateStarter.sessionFactory.openSession();
 			hibernateSession.beginTransaction();
 		} catch (NullPointerException e) {
-			System.out.println("Failed to initialize hibernatesession");
+			System.out.println("Failed to initialize HibernateSession.");
 			e.printStackTrace();
 		}
 	}
@@ -103,6 +108,11 @@ public class MingSession {
 	}
 
 	protected void commit() {
+		if(hibernateSession == null) {
+			System.err.println("Can't commit HibernateSession as there is no HibernateSession.");
+			return;
+		}
+		
 		try {
 			hibernateSession.getTransaction().commit();
 		} catch (NullPointerException e) {

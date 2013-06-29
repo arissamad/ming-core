@@ -32,7 +32,7 @@ public class StaticContentServlet extends HttpServlet {
 		
 		String mappedPath = mapPath(request.getPathInfo().toLowerCase());
 		
-		System.out.println("Mapped path is " + mappedPath);
+		System.out.println("\nRetrieving static file: " + mappedPath);
 		
 		ServletContext sc = getServletContext();
 		String mimeType = sc.getMimeType(mappedPath);
@@ -41,6 +41,7 @@ public class StaticContentServlet extends HttpServlet {
         InputStream is = getClass().getClassLoader().getResourceAsStream(mappedPath);
         
         if (is == null) {
+        	System.out.println(" -- Path not recognized");
         	request.getRequestDispatcher("error404.html").forward(request,response);
         	return;
         }

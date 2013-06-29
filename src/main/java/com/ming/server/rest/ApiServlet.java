@@ -27,6 +27,17 @@ import com.ming.server.session.*;
 public class ApiServlet extends HttpServlet {
 
 	protected static Map<String, Class<? extends ApiBase>> lookup;
+	
+	protected static String packageBase = "com.sirra";
+	
+	/**
+	 * Set the root package where ming-core will search for your API classes.
+	 * 
+	 * @param incomingPackageBase e.g. "com.sirra"
+	 */
+	public static void setAPIPackageBase(String incomingPackageBase) {
+		packageBase = incomingPackageBase;
+	}
 
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -58,7 +69,7 @@ public class ApiServlet extends HttpServlet {
     	String apiPath = request.getPathInfo();
     	HttpType httpMethod = HttpType.valueOf(request.getMethod());
     	
-    	System.out.println("--------- API Call Begin: " + httpMethod.name() + " " + apiPath +" --------- ");
+    	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath +" --------- ");
     	MingSession.start(request, response);
     	
     	try {
@@ -100,16 +111,41 @@ public class ApiServlet extends HttpServlet {
 	    	//response.getWriter().write("[api not found] The date is: " + new Date().toString());
     	}
     	finally {
-    		System.out.println("--------- API Call END: " + httpMethod.name() + " " + apiPath +" --------- ");
     		MingSession.end();
+    		System.out.println("--------- API Call END: " + httpMethod.name() + " " + apiPath +" ---------");
     	}
     }
     
+    protected Class processPath(List<String> pathList) {
+    	// Try longest first, and get progressively shorter
+    	
+    	for(int i=pathList.size(); i>=0; i--) {
+    		
+    		StringBuffer str = new StringBuffer("/");
+    		for(int j=0; j<i; j++) {
+    			str.append(pathList.get(j));
+    			
+    			if(j < i-1) {
+    				str.append("/");
+    			}
+    		}
+    		
+    		Class clazz = getCorrespondingClass(str.toString());
+    		if(clazz != null) {
+    			return clazz;
+    		}
+    	}
+    	
+    	throw new RuntimeException("Cannot find API Class in " + packageBase + ": " + pathList);
+    }
+    
     protected Class<? extends ApiBase> getCorrespondingClass(String restPath) {
+    	
+    	// Currently this does not allow for dynamic updates of REST classes in development mode.
     	if(lookup == null) {
     		lookup = new HashMap();
     		
-	    	Reflections reflections = new Reflections("com.ming");
+	    	Reflections reflections = new Reflections(packageBase);
 	    	Set<Class<? extends ApiBase>> apiClasses = reflections.getSubTypesOf(ApiBase.class);
 	    	
 	    	// For each class, figure out the path.
@@ -148,30 +184,6 @@ public class ApiServlet extends HttpServlet {
 
     	return lookup.get(restPath);
     }
-    
-    protected Class processPath(List<String> pathList) {
-    	// Try longest first, and get progressively shorter
-    	
-    	for(int i=pathList.size(); i>=0; i--) {
-    		
-    		StringBuffer str = new StringBuffer("/");
-    		for(int j=0; j<i; j++) {
-    			str.append(pathList.get(j));
-    			
-    			if(j < i-1) {
-    				str.append("/");
-    			}
-    		}
-    		
-    		Class clazz = getCorrespondingClass(str.toString());
-    		if(clazz != null) {
-    			return clazz;
-    		}
-    	}
-    	
-    	return null;
-    }
-    
     protected String formatResponse(Object returnValue) {
     	Object json;
     	
