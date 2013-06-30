@@ -4,7 +4,7 @@
 
 	<groupId>com.ming</groupId>
 	<artifactId>ming-core</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 	<packaging>jar</packaging>
 	
 	<name>ming-core</name>
