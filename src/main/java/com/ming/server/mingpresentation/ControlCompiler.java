@@ -88,7 +88,7 @@ public class ControlCompiler {
 			String content = IOUtils.toString(is);
 			fileList.add(content);
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException();
 		}
 	}
 	

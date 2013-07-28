@@ -12,7 +12,7 @@ import org.reflections.*;
  */
 public class AnnotatedMethodCaller {
 	
-	public static Object call(ApiBase apiBase, Class annotationClass) {
+	public static Object call(ApiBase apiBase, Class annotationClass, List<Object> parameters) {
 		
 		Set<Method> methods = ReflectionUtils.getAllMethods(apiBase.getClass(), ReflectionUtils.withAnnotation(annotationClass));
 		
@@ -22,8 +22,13 @@ public class AnnotatedMethodCaller {
 		
 		Method method = methods.iterator().next();
 		
+		Object[] parameterArray = new Object[0];
+		if(parameters != null) {
+			parameterArray = parameters.toArray();
+		}
+		
 		try {
-			return method.invoke(apiBase, new Object[0]);
+			return method.invoke(apiBase, parameterArray);
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}

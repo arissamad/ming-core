@@ -2,6 +2,8 @@
 
 // Global variable _ming.
 var _ming = {};
+var gv = {};
+
 var current = null;
 
 
@@ -106,6 +108,8 @@ var _initialLoaded = function(extension) {
 		log("Loaded all files. Starting page-specific ming code.");
 		
 		current = $("#ming");
+		
+		// We need to check if onLoad was already called
 		onMingStart();
 	}
 }

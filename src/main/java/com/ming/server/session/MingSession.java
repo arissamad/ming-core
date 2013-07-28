@@ -22,6 +22,10 @@ public class MingSession {
 		lookup.put(Thread.currentThread(), new MingSession(request, response));
 	}
 	
+	public static void start() {
+		lookup.put(Thread.currentThread(), new MingSession());
+	}
+	
 	public static MingSession get() {
 		MingSession ms = lookup.get(Thread.currentThread());
 		
@@ -35,6 +39,11 @@ public class MingSession {
 		ms.commit();
 	}
 	
+	public static void rollback() {
+		MingSession ms = lookup.remove(Thread.currentThread());
+		ms._rollback();	
+	}
+	
 	protected HttpServletRequest request;
 	protected HttpServletResponse response;
 	
@@ -46,12 +55,21 @@ public class MingSession {
 	protected Map<String, Object> dataMap;
 	
 	private MingSession(HttpServletRequest request, HttpServletResponse response) {
-		dataMap = new HashMap();
 		this.request = request;
 		this.response = response;
 		
-		if(hibernateSession == null) {
-			System.err.println("Can't initialize HibernateSession as there is no HibernateSession.");
+		init();
+	}
+	
+	private MingSession() {
+		init();
+	}
+	
+	protected void init() {
+		dataMap = new HashMap();
+		
+		if(HibernateStarter.sessionFactory == null) {
+			System.err.println("Can't initialize HibernateSession as HibernateStarter was not initialized.");
 			return;
 		}
 		
@@ -115,6 +133,22 @@ public class MingSession {
 		
 		try {
 			hibernateSession.getTransaction().commit();
+			hibernateSession.close();
+		} catch (NullPointerException e) {
+			System.out.println("Failed to commit");
+			e.printStackTrace();
+		}
+	}
+	
+	protected void _rollback() {
+		if(hibernateSession == null) {
+			System.err.println("Can't commit HibernateSession as there is no HibernateSession.");
+			return;
+		}
+		
+		try {
+			hibernateSession.getTransaction().rollback();
+			hibernateSession.close();
 		} catch (NullPointerException e) {
 			System.out.println("Failed to commit");
 			e.printStackTrace();

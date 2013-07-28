@@ -16,6 +16,10 @@ import org.apache.commons.io.*;
  */
 public class Template {
 	
+	/**
+	 * Searches for template from /resources/templates folder. You should pass in the subfolder,
+	 * like "emails/hello.html".
+	 */
 	public static String get(String fileName, String... nameValuePairs) {
 		URL url = Template.class.getClassLoader().getResource("templates/" + fileName.toLowerCase());
 		

@@ -68,9 +68,13 @@ public class ApiServlet extends HttpServlet {
     {
     	String apiPath = request.getPathInfo();
     	HttpType httpMethod = HttpType.valueOf(request.getMethod());
+
+    	String parameterString = request.getParameter("parameters");
     	
-    	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath +" --------- ");
+    	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath + " " + parameterString + " --------- ");
     	MingSession.start(request, response);
+    	
+    	List<Object> parameters = (List<Object>) JsonUtil.getInstance().parse(parameterString);
     	
     	try {
 	    	
@@ -88,16 +92,16 @@ public class ApiServlet extends HttpServlet {
 	    		
 	    		Object result = null;
 	    		if(httpMethod == HttpType.GET) {
-	    			result = AnnotatedMethodCaller.call(apiBase, GET.class);
+	    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
 	    			
 	    		} else if(httpMethod == HttpType.POST) {
-	    			result = AnnotatedMethodCaller.call(apiBase, POST.class);
+	    			result = AnnotatedMethodCaller.call(apiBase, POST.class, parameters);
 	    		} else if(httpMethod == HttpType.PUT) {
-	    			result = AnnotatedMethodCaller.call(apiBase, PUT.class);
+	    			result = AnnotatedMethodCaller.call(apiBase, PUT.class, parameters);
 	    		} else if(httpMethod == HttpType.DELETE) {
-	    			result = AnnotatedMethodCaller.call(apiBase, DELETE.class);
+	    			result = AnnotatedMethodCaller.call(apiBase, DELETE.class, parameters);
 	    		} else {
-	    			result = AnnotatedMethodCaller.call(apiBase, GET.class);
+	    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
 	    		}
 	
 	    		String responseStr = formatResponse(result);
